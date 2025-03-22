@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Clonar repositorio
+    - name: Clonar repositorio con token
       uses: actions/checkout@v3
       with:
         token: ${{ secrets.GH_TOKEN }}
