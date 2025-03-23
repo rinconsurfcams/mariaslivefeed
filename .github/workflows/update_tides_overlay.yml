@@ -1,4 +1,3 @@
-
 name: Update Tides Overlay
 
 on:
@@ -35,3 +34,12 @@ jobs:
         git add overlay_tides.json
         git diff --cached --quiet || git commit -m "🔄 Actualización de overlay_tides.json"
         git push
+
+      - name: 🚀 Generar HTML del cintillo
+        run: python generate_tide_cintillo.py
+
+      - name: 💾 Commit de tide_overlay_cintillo.html
+        run: |
+          git add tide_overlay_cintillo.html
+          git commit -m "🔄 HTML del cintillo actualizado automáticamente" || echo "Sin cambios"
+          git push
