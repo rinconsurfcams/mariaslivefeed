@@ -1,25 +1,45 @@
 {
-  "timestamp": "2025-03-23 07:17:38",
-  "tide_predictions": [
-    {
-      "type": "Alta",
-      "time": "3:24 AM",
-      "height_ft": 0.989
-    },
-    {
-      "type": "Baja",
-      "time": "10:21 AM",
-      "height_ft": 0.209
-    },
-    {
-      "type": "Alta",
-      "time": "2:58 PM",
-      "height_ft": 0.522
-    },
-    {
-      "type": "Baja",
-      "time": "9:03 PM",
-      "height_ft": -0.042
-    }
-  ]
+    "timestamp": "2025-03-23 11:37:13",
+    "tide_predictions": [
+        {
+            "time": "03:24 AM",
+            "type": "Alta",
+            "height_ft": 0.989
+        },
+        {
+            "time": "10:21 AM",
+            "type": "Baja",
+            "height_ft": 0.209
+        },
+        {
+            "time": "02:58 PM",
+            "type": "Alta",
+            "height_ft": 0.522
+        },
+        {
+            "time": "09:03 PM",
+            "type": "Baja",
+            "height_ft": -0.042
+        },
+        {
+            "time": "04:26 AM",
+            "type": "Alta",
+            "height_ft": 1.057
+        },
+        {
+            "time": "11:13 AM",
+            "type": "Baja",
+            "height_ft": 0.214
+        },
+        {
+            "time": "04:10 PM",
+            "type": "Alta",
+            "height_ft": 0.611
+        },
+        {
+            "time": "10:10 PM",
+            "type": "Baja",
+            "height_ft": -0.021
+        }
+    ]
 }
