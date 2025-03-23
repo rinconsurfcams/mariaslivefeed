@@ -10,7 +10,7 @@ def fetch_data():
     dataset = nc.Dataset(wave_url)
 
     # Extraer datos de olas
-    wave_heights = dataset.variables["WVHT"][:]
+   wave_heights = dataset.variables["waveHs"][:]
     times = nc.num2date(dataset.variables["time"][:], units=dataset.variables["time"].units)
 
     df = pd.DataFrame({
