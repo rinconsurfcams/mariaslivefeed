@@ -1,0 +1,43 @@
+
+name: Update Tides and Wave Overlay
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"  # Cada 15 minutos
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clonar repositorio
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Instalar librerías necesarias
+        run: |
+          pip install requests netCDF4 pandas
+
+      - name: 🌊 Ejecutar script de mareas (tides)
+        run: python import_tides_overlay.py
+
+      - name: 🌊 Ejecutar script de datos de la boya (wave)
+        run: python import_data_json_with_wave.py
+
+      - name: 🚀 Generar HTML del cintillo
+        run: python generate_tide_cintillo.py
+
+      - name: 💾 Hacer commit si hay cambios
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git add overlay_tides.json overlay.json tide_overlay_cintillo.html
+          git diff --cached --quiet || git commit -m "🔄 Actualización de mareas, oleaje y cintillo"
+          git push
