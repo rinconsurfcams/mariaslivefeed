@@ -21,9 +21,14 @@ future = [p for p in overlay_data["tide_predictions"] if p["minutes"] >= now_min
 last = past[-1] if past else None
 next_tide = future[0] if future else None
 
-# Lógica mejorada basada en comparación de altura
+# Nueva lógica basada en el tipo (Alta/Baja)
 if last and next_tide:
-    trend = "SUBIENDO" if next_tide["height_ft"] > last["height_ft"] else "BAJANDO"
+    if last["type"] == "Baja" and next_tide["type"] == "Alta":
+        trend = "SUBIENDO"
+    elif last["type"] == "Alta" and next_tide["type"] == "Baja":
+        trend = "BAJANDO"
+    else:
+        trend = "N/A"
 else:
     trend = "N/A"
 
