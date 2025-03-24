@@ -20,12 +20,16 @@ future = [p for p in overlay_data["tide_predictions"] if p["minutes"] >= now_min
 
 last = past[-1] if past else None
 next_tide = future[0] if future else None
-trend = "SUBIENDO" if last and next_tide and last["type"] == "Baja" and next_tide["type"] == "Alta" else "BAJANDO"
+
+# Lógica mejorada basada en comparación de altura
+if last and next_tide:
+    trend = "SUBIENDO" if next_tide["height_ft"] > last["height_ft"] else "BAJANDO"
+else:
+    trend = "N/A"
 
 next_high = next((p for p in future if p["type"] == "Alta"), None)
 next_low = next((p for p in future if p["type"] == "Baja"), None)
 
-# Valores por defecto si no hay próxima marea
 high_text = f"{next_high['height_ft']} pies @ {next_high['time']}" if next_high else "N/A"
 low_text = f"{next_low['height_ft']} pies @ {next_low['time']}" if next_low else "N/A"
 
