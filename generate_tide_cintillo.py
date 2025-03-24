@@ -25,25 +25,30 @@ trend = "SUBIENDO" if last and next_tide and last["type"] == "Baja" and next_tid
 next_high = next((p for p in future if p["type"] == "Alta"), None)
 next_low = next((p for p in future if p["type"] == "Baja"), None)
 
+# Valores por defecto si no hay próxima marea
+high_text = f"{next_high['height_ft']} pies @ {next_high['time']}" if next_high else "N/A"
+low_text = f"{next_low['height_ft']} pies @ {next_low['time']}" if next_low else "N/A"
+
 html_cintillo = f"""<div id='tide-ticker' style='
   position: absolute;
   bottom: 0;
   width: 100%;
-  background: rgba(0, 0, 128, 0.85);
+  background: rgba(0, 0, 128, 0.5);
   color: white;
-  font-size: 18px;
-  font-weight: bold;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 17px;
+  font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   z-index: 9999;
-  padding: 5px 0;
+  padding: 6px 0;
 '>
   <div id='tide-content' style='
     display: inline-block;
     padding-left: 100%;
-    animation: scroll-left 20s linear infinite;
+    animation: scroll-left 25s linear infinite;
   '>
-    🌊 Marea {trend} | 📈 Alta: {next_high['height_ft']} pies @ {next_high['time']} | 📉 Baja: {next_low['height_ft']} pies @ {next_low['time']} | ⏱️ {overlay_data["timestamp"]}
+    🌊 Marea {trend} | 📈 Alta: {high_text} | 📉 Baja: {low_text} | ⏱️ {overlay_data["timestamp"]}
   </div>
 </div>
 
@@ -57,4 +62,4 @@ html_cintillo = f"""<div id='tide-ticker' style='
 with open("tide_overlay_cintillo.html", "w", encoding="utf-8") as f:
     f.write(html_cintillo)
 
-print("✅ tide_overlay_cintillo.html actualizado correctamente.")
+print("✅ tide_overlay_cintillo.html generado correctamente.")
