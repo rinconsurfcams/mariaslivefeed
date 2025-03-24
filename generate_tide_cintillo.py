@@ -15,22 +15,29 @@ now_minutes = now.hour * 60 + now.minute
 for p in overlay_data["tide_predictions"]:
     p["minutes"] = hora_a_minutos(p["time"])
 
+# Ordenar por minutos por si acaso no vienen ordenadas
+overlay_data["tide_predictions"].sort(key=lambda p: p["minutes"])
+
 past = [p for p in overlay_data["tide_predictions"] if p["minutes"] < now_minutes]
 future = [p for p in overlay_data["tide_predictions"] if p["minutes"] >= now_minutes]
 
 last = past[-1] if past else None
 next_tide = future[0] if future else None
 
-# Nueva lógica basada en el tipo (Alta/Baja)
+# Lógica flexible para determinar la tendencia
 if last and next_tide:
     if last["type"] == "Baja" and next_tide["type"] == "Alta":
         trend = "SUBIENDO"
     elif last["type"] == "Alta" and next_tide["type"] == "Baja":
         trend = "BAJANDO"
     else:
-        trend = "N/A"
+        trend = "CAMBIANTE"
+elif next_tide and next_tide["type"] == "Alta":
+    trend = "SUBIENDO"
+elif next_tide and next_tide["type"] == "Baja":
+    trend = "BAJANDO"
 else:
-    trend = "N/A"
+    trend = "NO DISPONIBLE"
 
 next_high = next((p for p in future if p["type"] == "Alta"), None)
 next_low = next((p for p in future if p["type"] == "Baja"), None)
