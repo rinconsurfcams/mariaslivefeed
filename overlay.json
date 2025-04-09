@@ -1,1 +1,4 @@
-{"timestamp": "2025-04-09 17:00:00", "wave_height_ft": 3.7, "wave_period": 12.5, "wave_direction": 7, "wind_speed": 0.9, "wind_direction": 348}
+{
+  "timestamp": "2025-04-09 21:00:00",
+  "significant_wave_height": 1.13
+}
