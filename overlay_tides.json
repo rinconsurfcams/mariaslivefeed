@@ -1,26 +1,6 @@
 {
-    "timestamp": "2025-04-14 23:52:45",
+    "timestamp": "2025-04-15 01:53:18",
     "tide_predictions": [
-        {
-            "time": "04:18 AM",
-            "type": "Baja",
-            "height_ft": 0.004
-        },
-        {
-            "time": "09:28 AM",
-            "type": "Alta",
-            "height_ft": 0.672
-        },
-        {
-            "time": "03:25 PM",
-            "type": "Baja",
-            "height_ft": -0.127
-        },
-        {
-            "time": "10:16 PM",
-            "type": "Alta",
-            "height_ft": 1.149
-        },
         {
             "time": "04:59 AM",
             "type": "Baja",
@@ -40,6 +20,26 @@
             "time": "10:51 PM",
             "type": "Alta",
             "height_ft": 1.115
+        },
+        {
+            "time": "05:41 AM",
+            "type": "Baja",
+            "height_ft": 0.013
+        },
+        {
+            "time": "10:31 AM",
+            "type": "Alta",
+            "height_ft": 0.544
+        },
+        {
+            "time": "04:25 PM",
+            "type": "Baja",
+            "height_ft": -0.145
+        },
+        {
+            "time": "11:29 PM",
+            "type": "Alta",
+            "height_ft": 1.08
         }
     ]
 }
