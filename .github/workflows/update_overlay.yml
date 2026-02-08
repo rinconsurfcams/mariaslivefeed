@@ -17,7 +17,7 @@ jobs:
     - name: Install NetCDF4
       run: pip install netCDF4
     - name: Run script
-      run: python import_data_json.py
+      run: python import_data_json_with_wave.py
     - name: Push changes
       run: |
         git config --global user.name "github-actions[bot]"
