@@ -1,62 +1,120 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
+    <meta charset="utf-8">
+    <title>Wavemaps Live Data Overlay</title>
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background: transparent;
-            font-family: 'Helvetica', Arial, sans-serif;
+        /* Estilos para que se vea profesional en OBS */
+        body { 
+            margin: 0; 
+            padding: 0; 
+            overflow: hidden; 
+            background: transparent; /* Fundamental para que no se vea un cuadro blanco */
         }
-        .wave-card {
+
+        #overlay {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: white;
+            /* Fondo azul oscuro traslúcido tipo Wavemaps */
+            background: rgba(0, 32, 63, 0.8); 
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 6px solid #00D2FF; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            min-width: 280px;
+        }
+
+        .header {
+            font-size: 0.75em;
+            margin-bottom: 10px;
+            opacity: 0.8;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 5px;
+        }
+
+        .data-row {
+            margin-bottom: 8px;
             display: flex;
             align-items: center;
-            background: rgba(0, 20, 50, 0.7); /* Azul oscuro semitransparente */
-            color: white;
-            padding: 10px 20px;
-            border-radius: 10px;
-            border-left: 5px solid #00aaff; /* Borde brillante estilo Wavemaps */
-            width: fit-content;
         }
+
+        .icon {
+            font-size: 1.3em;
+            margin-right: 12px;
+            width: 30px;
+            text-align: center;
+        }
+
         .value {
-            font-size: 32px;
             font-weight: bold;
-            margin-right: 10px;
+            font-size: 1.2em;
+            color: #00D2FF;
         }
-        .label {
-            font-size: 14px;
-            text-transform: uppercase;
-            opacity: 0.8;
+
+        .unit {
+            font-size: 0.85em;
+            opacity: 0.9;
+            margin-left: 4px;
+        }
+
+        .footer {
+            margin-top: 10px;
+            font-size: 0.65em;
+            text-align: right;
+            font-style: italic;
+            opacity: 0.6;
         }
     </style>
 </head>
 <body>
-    <div class="wave-card">
-        <div>
-            <div class="label">Boya Rincón (Hs)</div>
-            <div id="wave-height" class="value">Cargando...</div>
+
+    <div id="overlay">
+        <div class="header">📍 Rincón Buoy Data</div>
+        <div id="content">
+            <div class="data-row">🌊 Cargando oleaje...</div>
         </div>
+        <div class="footer">Powered by Wavemaps</div>
     </div>
 
     <script>
-        async function updateData() {
+        async function updateOverlay() {
             try {
-                // Reemplaza con tu URL RAW del archivo overlay.json
-                const response = await fetch('https://raw.githubusercontent.com/rinconsurfcams/mariaslivefeed/main/overlay.json');
+                // Buscamos el JSON que genera tu script de Python
+                const response = await fetch("overlay.json");
                 const data = await response.json();
                 
-                // Convertir metros a pies si prefieres (1m = 3.28ft)
-                const heightFt = (data.significant_wave_height * 3.28084).toFixed(1);
-                
-                document.getElementById('wave-height').innerText = heightFt + ' FT';
-            } catch (e) {
-                console.error("Error cargando data", e);
+                document.getElementById("content").innerHTML = `
+                    <div class="data-row">
+                        <span class="icon">🌊</span>
+                        <span class="value">${data.wave_height_ft}</span><span class="unit">FT</span>
+                        <span style="margin-left:15px">@ ${data.wave_period}s</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="icon">🧭</span>
+                        <span class="unit">Dirección:</span>
+                        <span class="value" style="margin-left:5px">${data.wave_direction}°</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="icon">💨</span>
+                        <span class="value">${data.wind_speed}</span><span class="unit">KTS</span>
+                        <span class="unit" style="margin-left:10px">(${data.wind_direction}°)</span>
+                    </div>
+                `;
+            } catch (error) {
+                console.error("Error al cargar los datos:", error);
+                document.getElementById("content").innerHTML = "⚠️ Error de conexión";
             }
         }
-        
-        setInterval(updateData, 60000); // Actualiza cada minuto
-        updateData();
+
+        // Ejecutar al cargar
+        updateOverlay();
+        // Actualizar automáticamente cada 5 minutos
+        setInterval(updateOverlay, 5 * 60 * 1000);
     </script>
 </body>
 </html>
