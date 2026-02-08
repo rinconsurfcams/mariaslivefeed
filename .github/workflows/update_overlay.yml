@@ -8,15 +8,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # ESTO ES LO MÁS IMPORTANTE PARA QUE EL PUSH FUNCIONE
     permissions:
       contents: write
 
     steps:
     - name: Clonar repositorio
       uses: actions/checkout@v3
-      with:
-        fetch-depth: 0 # Trae todo el historial para evitar errores de push
 
     - name: Configurar Python
       uses: actions/setup-python@v4
@@ -26,17 +23,18 @@ jobs:
     - name: Instalar dependencias
       run: pip install netCDF4 pandas numpy
 
-    - name: Ejecutar script
+    - name: Ejecutar script y verificar contenido
       run: |
         python import_data_json.py
-        echo "Contenido generado:"
-        cat overlay.json # Esto nos permite ver en el log si el script funcionó
+        echo "--- CONTENIDO DEL JSON GENERADO ---"
+        cat overlay.json
+        echo "--- FIN DEL CONTENIDO ---"
 
-    - name: Hacer commit y push
+    - name: Hacer commit y push forzado
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git add overlay.json
-        # Forzamos el commit con la fecha para que siempre detecte un cambio
-        git commit -m "🔄 Boya Rincón: $(date)" || echo "No hay cambios"
-        git push origin HEAD:main
+        # Forzamos el commit con la fecha para asegurar que git vea un cambio
+        git commit -m "🔄 Boya Rincón: $(date)"
+        git push origin HEAD:main --force
