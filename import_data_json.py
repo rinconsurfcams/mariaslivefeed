@@ -3,46 +3,45 @@ import json
 import time
 from datetime import datetime, timedelta
 
+# URLs con bypass de caché
 WAVE_URL = f'http://dm3.caricoos.org/thredds/dodsC/content/Rincon_Waverider/Realtime/181p1_rt.nc?t={int(time.time())}'
 WIND_URL = f'http://dm1.caricoos.org/thredds/dodsC/content/WindNet/e9889_tpr_realtime.nc?t={int(time.time())}'
 
 def fetch_data():
     try:
-        wave_ds = nc.Dataset(WAVE_URL)
+        w_ds = nc.Dataset(WAVE_URL)
         wind_ds = nc.Dataset(WIND_URL)
 
-        # Olas - Buscamos el último dato no nulo manualmente
-        h_var = wave_ds.variables['waveHs']
-        p_var = wave_ds.variables['waveTp']
-        d_var = wave_ds.variables['waveDp']
-        t_var = wave_ds.variables['waveTime']
-
-        # Encontrar último índice válido sin usar numpy
+        # Buscar el último dato de ola real (retrocediendo desde el final)
+        h_var = w_ds.variables['waveHs']
         idx = -1
-        for i in range(len(h_var) - 1, -1, -1):
-            if h_var[i] is not None and str(h_var[i]) != '--' and str(h_var[i]) != 'nan':
+        for i in range(len(h_var)-1, -1, -1):
+            val = h_var[i]
+            if val is not None and str(val) != '--' and str(val) != 'nan':
                 idx = i
                 break
-        
-        # Viento - Buscamos el último dato no nulo
+
+        # Buscar el último dato de viento real
         ws_var = wind_ds.variables['AvrgWS']
-        wd_var = wind_ds.variables['DirWS']
         w_idx = -1
-        for i in range(len(ws_var) - 1, -1, -1):
+        for i in range(len(ws_var)-1, -1, -1):
             if ws_var[i] is not None and str(ws_var[i]) != '--':
                 w_idx = i
                 break
 
+        t_var = w_ds.variables['waveTime']
+        # Ajuste a hora de Puerto Rico (UTC-4)
+        local_dt = nc.num2date(t_var[idx], units=t_var.units) - timedelta(hours=4)
+
         data = {
-            'timestamp': (nc.num2date(t_var[idx], units=t_var.units) - timedelta(hours=4)).strftime('%Y-%m-%d %H:%M:%S'),
+            'timestamp': local_dt.strftime('%Y-%m-%d %H:%M:%S'),
             'wave_height_ft': round(float(h_var[idx] * 3.28084), 1),
-            'wave_period': round(float(p_var[idx]), 1),
-            'wave_direction': int(d_var[idx]),
-            'wind_speed': round(float(ws_var[w_idx] * 1.94384), 1),
-            'wind_direction': int(wd_var[w_idx])
+            'wave_period': round(float(w_ds.variables['waveTp'][idx]), 1),
+            'wave_direction': int(w_ds.variables['waveDp'][idx]),
+            'wind_speed': round(float(wind_ds.variables['AvrgWS'][w_idx] * 1.94384), 1),
+            'wind_direction': int(wind_ds.variables['DirWS'][w_idx])
         }
-        
-        wave_ds.close()
+        w_ds.close()
         wind_ds.close()
         return data
     except Exception as e:
@@ -54,4 +53,4 @@ if __name__ == "__main__":
     if res:
         with open('overlay.json', 'w') as f:
             json.dump(res, f, indent=2)
-        print("✅ Overlay actualizado correctamente")
+        print("✅ Overlay actualizado con éxito")
