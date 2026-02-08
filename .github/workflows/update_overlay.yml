@@ -2,19 +2,21 @@ name: Update overlay.json
 
 on:
   schedule:
-    - cron: "*/15 * * * *" # Se ejecuta cada 15 minutos
-  workflow_dispatch: # Permite ejecutarlo manualmente para probar
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    # ESTO ES LO MÁS IMPORTANTE PARA QUE EL PUSH FUNCIONE
+    permissions:
+      contents: write
 
     steps:
     - name: Clonar repositorio
       uses: actions/checkout@v3
       with:
-        # Usamos el token por defecto de GitHub Actions para mayor facilidad
-        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0 # Trae todo el historial para evitar errores de push
 
     - name: Configurar Python
       uses: actions/setup-python@v4
@@ -22,18 +24,19 @@ jobs:
         python-version: '3.11'
 
     - name: Instalar dependencias
-      run: |
-        pip install netCDF4 pandas numpy
+      run: pip install netCDF4 pandas numpy
 
     - name: Ejecutar script
-      # ASEGÚRATE de que el archivo .py en tu repo se llame exactamente así
-      run: python import_data_json.py
+      run: |
+        python import_data_json.py
+        echo "Contenido generado:"
+        cat overlay.json # Esto nos permite ver en el log si el script funcionó
 
     - name: Hacer commit y push
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git add overlay.json
-        # Agregamos la fecha al mensaje para que cada commit sea único
-        git commit -m "🔄 Boya Rincón: $(date)" || echo "Sin cambios para subir"
-        git push
+        # Forzamos el commit con la fecha para que siempre detecte un cambio
+        git commit -m "🔄 Boya Rincón: $(date)" || echo "No hay cambios"
+        git push origin HEAD:main
