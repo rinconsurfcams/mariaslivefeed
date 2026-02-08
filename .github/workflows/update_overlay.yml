@@ -2,18 +2,19 @@ name: Update overlay.json
 
 on:
   schedule:
-    - cron: "*/15 * * * *"
-  workflow_dispatch:
+    - cron: "*/15 * * * *" # Se ejecuta cada 15 minutos
+  workflow_dispatch: # Permite ejecutarlo manualmente para probar
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Clonar repositorio con token
+    - name: Clonar repositorio
       uses: actions/checkout@v3
       with:
-        token: ${{ secrets.GH_TOKEN }}
+        # Usamos el token por defecto de GitHub Actions para mayor facilidad
+        token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Configurar Python
       uses: actions/setup-python@v4
@@ -22,15 +23,16 @@ jobs:
 
     - name: Instalar dependencias
       run: |
-        pip install netCDF4 pandas
+        pip install netCDF4 pandas numpy
 
-    - name: Ejecutar script para generar overlay.json
+    - name: Ejecutar script
+      # ASEGÚRATE de que el archivo .py en tu repo se llame exactamente así
       run: python import_data_json.py
 
-    - name: Hacer commit si hay cambios
+    - name: Hacer commit y push
       run: |
-        git config --global user.name "GitHub Action"
-        git config --global user.email "action@github.com"
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git add overlay.json
-        git diff --cached --quiet || git commit -m "🔄 Actualización automática de overlay.json"
-        git push
+        # Solo hace push si el archivo cambió realmente
+        git diff --quiet && git diff --staged --quiet || (git commit -m "🔄 Boya Rincón: Actualización de datos" && git push)
