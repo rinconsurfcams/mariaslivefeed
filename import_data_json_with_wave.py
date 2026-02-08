@@ -5,7 +5,7 @@ from datetime import datetime
 import json
 
 def fetch_data():
-    wave_url = "http://dm3.caricoos.org/thredds/dodsC/content/Rincon_Waverider/Realtime/181p1_rt.nc"
+    wave_url = ""
     dataset = nc.Dataset(wave_url)
 
     # Extraer datos de olas usando 'waveHs'
