@@ -1,10 +1,8 @@
 name: Update overlay.json
-
 on:
   schedule:
     - cron: "*/15 * * * *"
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -12,23 +10,18 @@ jobs:
       contents: write
     steps:
     - uses: actions/checkout@v3
-
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
-
     - name: Install NetCDF4
       run: pip install netCDF4
-
     - name: Run script
       run: python import_data_json.py
-
-    - name: Commit and Push
+    - name: Push changes
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git add overlay.json
-        # El comando '|| exit 0' permite que el workflow termine en VERDE aunque no haya cambios
-        git commit -m "🔄 Actualización Boya: $(date)" || exit 0
+        git commit -m "🔄 Actualización automática: $(date)" || exit 0
         git push origin main
