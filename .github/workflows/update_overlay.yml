@@ -11,30 +11,24 @@ jobs:
     permissions:
       contents: write
     steps:
-    - name: Clonar repositorio
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
-    - name: Configurar Python
+    - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.9'
+        python-version: '3.11'
 
-    - name: Instalar dependencias
-      run: |
-        pip install --upgrade pip
-        pip install numpy==1.26.4
-        pip install netCDF4
+    - name: Install NetCDF4
+      run: pip install netCDF4
 
-    - name: Ejecutar script
-      run: |
-        python import_data_json.py
-        echo "--- Datos Generados ---"
-        cat overlay.json
+    - name: Run script
+      run: python import_data_json.py
 
-    - name: Hacer commit y push
+    - name: Commit and Push
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git add overlay.json
-        git commit -m "🔄 Boya Rincón: $(date)" || exit 0
+        # El comando '|| exit 0' permite que el workflow termine en VERDE aunque no haya cambios
+        git commit -m "🔄 Actualización Boya: $(date)" || exit 0
         git push origin main
