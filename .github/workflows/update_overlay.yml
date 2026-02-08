@@ -10,7 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-
     steps:
     - name: Clonar repositorio
       uses: actions/checkout@v3
@@ -18,23 +17,24 @@ jobs:
     - name: Configurar Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.11'
+        python-version: '3.9'
 
     - name: Instalar dependencias
-      run: pip install netCDF4 pandas numpy
+      run: |
+        pip install --upgrade pip
+        pip install numpy==1.26.4
+        pip install netCDF4
 
-    - name: Ejecutar script y verificar contenido
+    - name: Ejecutar script
       run: |
         python import_data_json.py
-        echo "--- CONTENIDO DEL JSON GENERADO ---"
+        echo "--- Datos Generados ---"
         cat overlay.json
-        echo "--- FIN DEL CONTENIDO ---"
 
-- name: Hacer commit y push
+    - name: Hacer commit y push
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git add overlay.json
-        # Intentamos el commit; si no hay cambios, el comando '|| exit 0' evita que salga rojo
         git commit -m "🔄 Boya Rincón: $(date)" || exit 0
         git push origin main
