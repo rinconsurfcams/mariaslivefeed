@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="utf-8">
-    <title>Wavemaps Live Data Overlay</title>
+    <title>Wavemaps & CariCOOS Data Overlay</title>
     <style>
         body { 
             margin: 0; 
@@ -33,6 +33,8 @@
             text-transform: uppercase;
             border-bottom: 1px solid rgba(255,255,255,0.1);
             padding-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
         }
 
         .data-row {
@@ -63,59 +65,74 @@
         .footer {
             margin-top: 10px;
             font-size: 0.65em;
-            text-align: right;
-            font-style: italic;
-            opacity: 0.6;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            opacity: 0.7;
         }
     </style>
 </head>
 <body>
 
     <div id="overlay">
-        <div class="header">📍 Rincón Buoy Data</div>
-        <div id="content">
-            <div class="data-row">🌊 Cargando oleaje...</div>
+        <div class="header">
+            <span>📍 BOYA RINCÓN</span>
+            <span id="update-time" style="font-size: 0.9em;">--:--</span>
         </div>
-        <div class="footer">Powered by Wavemaps</div>
+        
+        <div id="content">
+            <div class="data-row">
+                <span class="icon">🌊</span>
+                <span id="wave-h" class="value">--</span><span class="unit">FT</span>
+                <span id="wave-p" style="margin-left:15px">@ --s</span>
+            </div>
+            <div class="data-row">
+                <span class="icon">🧭</span>
+                <span class="unit">Dir. Oleaje:</span>
+                <span id="wave-d" class="value" style="margin-left:5px">--°</span>
+            </div>
+            <div class="data-row">
+                <span class="icon">💨</span>
+                <span id="wind-s" class="value">--</span><span class="unit">KTS</span>
+                <span id="wind-d" class="unit" style="margin-left:10px">(--°)</span>
+            </div>
+        </div>
+
+        <div class="footer">
+            <span>🌊 Wavemaps App</span>
+            <span>📡 CariCOOS.org</span>
+        </div>
     </div>
 
     <script>
         async function updateOverlay() {
             try {
-                // Usamos un timestamp para evitar que el navegador guarde una copia vieja (caché)
-                const cacheBuster = new Date().getTime();
-                const response = await fetch(`overlay.json?v=${cacheBuster}`);
-                
-                if (!response.ok) throw new Error('Archivo no encontrado');
+                // Cache buster para evitar que el navegador cargue data vieja
+                const response = await fetch(`overlay.json?v=${new Date().getTime()}`);
+                if (!response.ok) throw new Error('Error al leer JSON');
                 
                 const data = await response.json();
                 
-                document.getElementById("content").innerHTML = `
-                    <div class="data-row">
-                        <span class="icon">🌊</span>
-                        <span class="value">${data.wave_height_ft}</span><span class="unit">FT</span>
-                        <span style="margin-left:15px">@ ${data.wave_period}s</span>
-                    </div>
-                    <div class="data-row">
-                        <span class="icon">🧭</span>
-                        <span class="unit">Dirección:</span>
-                        <span class="value" style="margin-left:5px">${data.wave_direction}°</span>
-                    </div>
-                    <div class="data-row">
-                        <span class="icon">💨</span>
-                        <span class="value">${data.wind_speed}</span><span class="unit">KTS</span>
-                        <span class="unit" style="margin-left:10px">(${data.wind_direction}°)</span>
-                    </div>
-                `;
+                // Actualizar valores en el HTML
+                document.getElementById("wave-h").innerText = data.wave_height_ft;
+                document.getElementById("wave-p").innerText = `@ ${data.wave_period}s`;
+                document.getElementById("wave-d").innerText = `${data.wave_direction}°`;
+                document.getElementById("wind-s").innerText = data.wind_speed;
+                document.getElementById("wind-d").innerText = `(${data.wind_direction}°)`;
+                
+                // Extraer solo la hora del timestamp para el header
+                const timeStr = data.timestamp.split(' ')[1].substring(0, 5);
+                document.getElementById("update-time").innerText = timeStr;
+
             } catch (error) {
-                console.error("Error al cargar los datos:", error);
-                document.getElementById("content").innerHTML = "⚠️ Esperando datos de boya...";
+                console.error("Error:", error);
+                // No borramos lo que hay para no parpadear, solo mostramos error en consola
             }
         }
 
         updateOverlay();
-        // Actualiza cada 2 minutos
-        setInterval(updateOverlay, 2 * 60 * 1000);
+        // Sincronizado con CariCOOS (actualizan cada 10-30 min, nosotros cada 5)
+        setInterval(updateOverlay, 5 * 60 * 1000);
     </script>
 </body>
 </html>
