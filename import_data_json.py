@@ -57,7 +57,78 @@ def fetch_data():
             'wind_speed': wind_kts,
             'wind_direction': wind_deg
         }
+import netCDF4 as nc
+import numpy as np
+import json
+import time  # <--- Agregado para evitar caché
+from datetime import datetime, timedelta
 
+# URLs con timestamp para forzar data fresca
+WAVE_URL = f'http://dm3.caricoos.org/thredds/dodsC/content/Rincon_Waverider/Realtime/181p1_rt.nc?t={int(time.time())}'
+WIND_URL = f'http://dm1.caricoos.org/thredds/dodsC/content/WindNet/e9889_tpr_realtime.nc?t={int(time.time())}'
+
+def fetch_data():
+    try:
+        wave_ds = nc.Dataset(WAVE_URL)
+        wind_ds = nc.Dataset(WIND_URL)
+
+        wave_h_raw = np.array(wave_ds.variables['waveHs'][:])
+        wave_p_raw = np.array(wave_ds.variables['waveTp'][:])
+        wave_d_raw = np.array(wave_ds.variables['waveDp'][:])
+        wave_times = wave_ds.variables['waveTime']
+
+        valid_wave_indices = np.where(~np.isnan(wave_h_raw))[0]
+        if len(valid_wave_indices) == 0:
+            raise ValueError("No hay datos de oleaje válidos")
+        
+        w_idx = valid_wave_indices[-1]
+
+        h_ft = round(float(wave_h_raw[w_idx] * 3.28084), 1)
+        p_sec = round(float(wave_p_raw[w_idx]), 1)
+        d_deg = int(wave_d_raw[w_idx])
+
+        wind_s_raw = np.array(wind_ds.variables['AvrgWS'][:])
+        wind_d_raw = np.array(wind_ds.variables['DirWS'][:])
+
+        valid_wind_indices = np.where(~np.isnan(wind_s_raw))[0]
+        if len(valid_wind_indices) == 0:
+            raise ValueError("No hay datos de viento válidos")
+        
+        wind_idx = valid_wind_indices[-1]
+
+        wind_kts = round(float(wind_s_raw[wind_idx] * 0.868976), 1)
+        wind_deg = int(wind_d_raw[wind_idx])
+
+        dt = nc.num2date(wave_times[w_idx], units=wave_times.units) - timedelta(hours=4)
+
+        data_dict = {
+            'timestamp': dt.strftime('%Y-%m-%d %H:%M:%S'),
+            'wave_height_ft': h_ft,
+            'wave_period': p_sec,
+            'wave_direction': d_deg,
+            'wind_speed': wind_kts,
+            'wind_direction': wind_deg
+        }
+
+        wave_ds.close()
+        wind_ds.close()
+        return data_dict
+
+    except Exception as e:
+        print(f"❌ Error: {e}")
+        return None
+
+def main():
+    data = fetch_data()
+    if data:
+        with open('overlay.json', 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2)
+        print(f"✅ JSON actualizado: {data['wave_height_ft']}ft @ {data['wave_period']}s, Dir: {data['wave_direction']}°")
+    else:
+        print("⚠️ No se pudo actualizar.")
+
+if __name__ == "__main__":
+    main()
         wave_ds.close()
         wind_ds.close()
         return data_dict
@@ -78,3 +149,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
